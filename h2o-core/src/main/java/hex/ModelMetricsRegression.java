@@ -7,7 +7,6 @@ import water.util.ArrayUtils;
 public class ModelMetricsRegression extends ModelMetricsSupervised {
   public double residual_deviance() { return _mean_residual_deviance; }
   public final double _mean_residual_deviance;
-  //public double mean_absolute() { return _mean_absolute_error;}
   public final double _mean_absolute_error;
   public ModelMetricsRegression(Model model, Frame frame, long nobs, double mse, double sigma, double mae, double meanResidualDeviance) {
     super(model, frame, nobs, mse, null, sigma);
