@@ -10,6 +10,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import water.network.SecurityUtils;
 
 import java.io.*;
 import java.net.*;
@@ -83,6 +84,7 @@ public class h2odriver extends Configured implements Tool {
   static ArrayList<String> extraJvmArguments = new ArrayList<String>();
   static String jksFileName = null;
   static String jksPass = null;
+  static boolean ssl = false;
   static boolean hashLogin = false;
   static boolean ldapLogin = false;
   static String loginConfFileName = null;
@@ -782,6 +784,9 @@ public class h2odriver extends Configured implements Tool {
         i++; if (i >= args.length) { usage(); }
         jksPass = args[i];
       }
+      else if (s.equals("-ssl_config")) {
+        ssl = true;
+      }
       else if (s.equals("-hash_login")) {
         hashLogin = true;
       }
@@ -1220,6 +1225,14 @@ public class h2odriver extends Configured implements Tool {
     }
     if (loginConfFileName != null) {
       addMapperConf(conf, "-login_conf", "login.conf", loginConfFileName);
+    }
+
+    // SSL
+    if (ssl) {
+      SecurityUtils.SSLCredentials credentials = SecurityUtils.generateSSLPair();
+      String sslConfigFile = SecurityUtils.generateSSLConfig(credentials);
+      addMapperConf(conf, "", credentials.jks.name, credentials.jks.path);
+      addMapperConf(conf, "-ssl_config", "ssl.config", sslConfigFile);
     }
 
     conf.set(h2omapper.H2O_MAPPER_CONF_LENGTH, Integer.toString(mapperConfLength));

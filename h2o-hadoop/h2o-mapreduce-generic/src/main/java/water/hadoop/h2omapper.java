@@ -273,7 +273,10 @@ public class h2omapper extends Mapper<Text, Text, Text, Text> {
     int confLength = Integer.parseInt(conf.get(H2O_MAPPER_CONF_LENGTH));
     for (int i = 0; i < confLength; i++) {
       String arg = conf.get(H2O_MAPPER_CONF_ARG_BASE + Integer.toString(i));
-      argsList.add(arg);
+      // For files which are not passed as args (i.e. SSL certs)
+      if(!arg.isEmpty()) {
+        argsList.add(arg);
+      }
 
       String basename = conf.get(H2O_MAPPER_CONF_BASENAME_BASE + Integer.toString(i));
       File f = new File(ice_root);
@@ -287,11 +290,12 @@ public class h2omapper extends Mapper<Text, Text, Text, Text> {
         Log.POST(104, "after mkdirs()");
       }
       String fileName = ice_root + File.separator + basename;
-      FileOutputStream out = new FileOutputStream(fileName);
       String payload = conf.get(H2O_MAPPER_CONF_PAYLOAD_BASE + Integer.toString(i));
       byte[] byteArr = h2odriver.convertStringToByteArr(payload);
       h2odriver.writeBinaryFile(fileName, byteArr);
-      argsList.add(fileName);
+      if(!arg.isEmpty()) {
+        argsList.add(fileName);
+      }
     }
 
     String[] args = argsList.toArray(new String[argsList.size()]);
