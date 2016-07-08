@@ -84,7 +84,7 @@ public class h2odriver extends Configured implements Tool {
   static ArrayList<String> extraJvmArguments = new ArrayList<String>();
   static String jksFileName = null;
   static String jksPass = null;
-  static boolean ssl = false;
+  static String sslConfig = null;
   static boolean hashLogin = false;
   static boolean ldapLogin = false;
   static String loginConfFileName = null;
@@ -785,7 +785,12 @@ public class h2odriver extends Configured implements Tool {
         jksPass = args[i];
       }
       else if (s.equals("-ssl_config")) {
-        ssl = true;
+        if (i+1 >= args.length || args[i+1].startsWith("-")) {
+          sslConfig = "";
+        } else {
+          i++;
+          sslConfig = args[i];
+        }
       }
       else if (s.equals("-hash_login")) {
         hashLogin = true;
@@ -1228,11 +1233,13 @@ public class h2odriver extends Configured implements Tool {
     }
 
     // SSL
-    if (ssl) {
+    if (sslConfig.isEmpty()) {
       SecurityUtils.SSLCredentials credentials = SecurityUtils.generateSSLPair();
       String sslConfigFile = SecurityUtils.generateSSLConfig(credentials);
       addMapperConf(conf, "", credentials.jks.name, credentials.jks.path);
       addMapperConf(conf, "-ssl_config", "ssl.config", sslConfigFile);
+    } else {
+      addMapperConf(conf, "-ssl_config", "ssl.config", sslConfig);
     }
 
     conf.set(h2omapper.H2O_MAPPER_CONF_LENGTH, Integer.toString(mapperConfLength));
