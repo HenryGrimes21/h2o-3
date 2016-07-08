@@ -1,12 +1,10 @@
 package water.network;
 
-import sun.security.tools.keytool.CertAndKeyGen;
 import sun.security.x509.X500Name;
 
 import java.io.*;
 import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.Properties;
 
 public class SecurityUtils {
@@ -20,10 +18,11 @@ public class SecurityUtils {
             KeyStore ks = KeyStore.getInstance("JKS");
             ks.load(null, null);
 
-            CertAndKeyGen keypair = new CertAndKeyGen("DSA", "SHA1WithDSA", null);
+            CertAndKeyGenWrapper keypair = new CertAndKeyGenWrapper("RSA", "SHA1WithRSA", null);
+            keypair.generate(1024);
             X509Certificate[] chain = new X509Certificate[1];
             X500Name x500Name = new X500Name("", "", "", "", "", "");
-            chain[0] = keypair.getSelfCertificate(x500Name, new Date(), 90*24L*60L*60L);
+            chain[0] = keypair.getSelfCertificate(x500Name, 365*24L*60L*60L);
 
             ks.setKeyEntry("h2o-internal", keypair.getPrivateKey(), password.toCharArray(), chain);
 

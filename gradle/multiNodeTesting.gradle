@@ -6,3 +6,12 @@ task testMultiNode(type: Exec) {
     }
     commandLine 'bash', './testMultiNode.sh'
 }
+
+task testMultiNodeSSL(type: Exec) {
+    dependsOn jar, testJar
+    if (project.hasProperty("java6Convert")) {
+        environment "TEST_JAVA_HOME", System.getenv("JAVA_6_HOME")
+    }
+
+    commandLine 'bash', './testMultiNode.sh -ssl_config ../h2o-algos/src/test/resources/ssl.properties'
+}

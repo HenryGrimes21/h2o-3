@@ -27,3 +27,8 @@ test {
   // Defeat task 'test' by running no tests.
   exclude '**'
 }
+
+
+testMultiNodeSSL << {
+  commandLine 'bash', './testSSL.sh'
+}
