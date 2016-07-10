@@ -2,8 +2,8 @@ apply plugin: 'scala'
 
 // Specify properties
 ext {
-  scalaBinaryVersion = '2.10'
-  scalaVersion = '2.10.4'
+  scalaBaseVersion = '2.10'
+  scalaVersion = hasProperty('scalaVersion') ? getProperty('scalaVersion') : '2.10.4'
 }
 
 // Activate Zinc compiler and configure scalac
@@ -13,19 +13,19 @@ tasks.withType(ScalaCompile) {
     scalaCompileOptions.additionalParameters = ['-target:jvm-1.6']
 }
 
-jar {
-  baseName = "${project.name}_${scalaBinaryVersion}"
+// Rename all jars to a new name
+tasks.withType(Jar) {
+    baseName = "${project.name}_${scalaBaseVersion}"
 }
 
 // Create jar
 task testJar(type: Jar, dependsOn: testClasses) {
-    baseName = "${project.name}_${scalaBinaryVersion}"
     appendix = 'test'
     from sourceSets.test.output
 }
 
 // Create jar with scaladoc
-task scaladocJar(type: Jar, dependsOn: scaladoc) {
+task scaladocJar(type: Jar) {
     classifier = 'scaladoc'
     from scaladoc
 }
@@ -38,6 +38,16 @@ configurations {
 // Explicitly
 artifacts {
     testArchives testJar
+}
+
+// If the plugin is in the context then we need to change the artifact id
+plugins.withType(org.gradle.api.publish.maven.plugins.MavenPublishPlugin) {
+    artifacts {
+        toPublish scaladocJar
+    }
+    publishing.publications.all { p ->
+        p.artifactId = "${project.name}_${scalaBaseVersion}"
+    }
 }
 
 // Enable support for multi-node testing

@@ -1,26 +1,5 @@
-apply plugin: "java"
 apply plugin: 'maven-publish'
 apply plugin: "signing"
-
-//
-// Calculate artifact ID
-//
-def calcArtifactId() {
-    def rv
-    if ("${project.name}" == "h2o-scala") {
-        rv = "${project.name}_${scalaBinaryVersion}"
-    }
-    else {
-        rv = "${project.name}"
-    }
-    return rv
-}
-
-// Default task to bundle javadoc as jar
-task javadocJar(type: Jar, group: "documentation") {
-    classifier = 'javadoc'
-    from javadoc
-}
 
 // Default task to bundle sources code as jar
 task sourcesJar(type: Jar) {
@@ -40,7 +19,6 @@ configurations {
 }
 
 artifacts {
-    toPublish javadocJar
     toPublish sourcesJar
 }
 
@@ -72,7 +50,7 @@ publishing {
   publications {
 
       mavenAll(MavenPublication) {
-          artifactId calcArtifactId()
+          artifactId project.name
 
           H2OBuildVersion bv = new H2OBuildVersion(rootDir, version);
           def projectVersion = bv.getProjectVersion()
@@ -84,6 +62,7 @@ publishing {
 
           // Publish additional artifacts as documentaiton or source code
           configurations.toPublish.allArtifacts.each { art ->
+              println("--------> Publishing artifact for: " + art)
               logger.debug("Publishing artifact for: " + art)
               artifact art
           }
